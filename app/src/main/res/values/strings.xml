@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">License Plate Solver</string>
+
+    <string name="txt_message">Dummy Text</string>
+    <string name="solution_text_starting_text">Point me at the license plate!</string>
+    <string name="detected_text_starting_text">🚗🚘🏎️</string>
+    <string name="solved_text">%1$s = 100 %2$s</string>
+    <string name="unsolved_text">%1$s ≠ 100 %2$s</string>
+</resources>
