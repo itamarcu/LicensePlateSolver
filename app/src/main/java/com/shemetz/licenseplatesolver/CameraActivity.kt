@@ -7,12 +7,12 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.view.GestureDetectorCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.*
 import android.widget.TextView
 import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.text.TextBlock
 import com.google.android.gms.vision.text.TextRecognizer
-import android.view.*
 
 
 class CameraActivity : AppCompatActivity(), GestureDetector.OnDoubleTapListener, GestureDetector.OnGestureListener {
@@ -20,7 +20,6 @@ class CameraActivity : AppCompatActivity(), GestureDetector.OnDoubleTapListener,
 
     companion object {
         const val TAG = "CameraActivity"
-        const val targetNumberForSolving: Double = 100.0
         /**
          * "^\D?\d{2}[,:;. \-\\|/]?\d{3}[,:;. \-\\|/]?\d{2}\d{3}[,:;. \-\\|/]?\d{2}[,:;. \-\\|/]?\d{3})\D?$"
          *
@@ -28,20 +27,26 @@ class CameraActivity : AppCompatActivity(), GestureDetector.OnDoubleTapListener,
          *
          * basically, the valid separator characters are:    ,:;. -\|/
          *
+         * including line breaks, which is why motorcycles work ^_^
+         *
          * and it's 2-3-2 (7 digits) or 3-2-3 (8 digits)
+         *
+         * And it allows little mistakes on the sides, and an optional "IL" on the left
          */
         val validIsraeliNumberRegex = Regex(
-                """ ^\D?
+                """ ^
+                    I?L?\D?
                     (
                     (\d{2}[,:;.\s\-\\|/]?\d{3}[,:;.\s\-\\|/]?\d{2})
                     |
                     (\d{3}[,:;.\s\-\\|/]?\d{2}[,:;.\s\-\\|/]?\d{3})
                     )
-                    \D?$
+                    \D?
+                    $
                 """.replace("\\s".toRegex(), "")
         )
-        val GOOD_EMOJIS = listOf("👌", "💯", "✅", "😀", "😊", "🤓", "🙃", "☺", "😁")
-        val BAD_EMOJIS = listOf("😢", "❌", "🤷", "🙅", "😬", "😕", "😔", "😨", "😱", "😧", "😭", "😞")
+        val GOOD_EMOJIS = listOf("👍", "👌", "💯", "✔️", "😀", "😊", "🤓", "🙃", "☺", "😁", "😂", "😎", "🎉", "👯")
+        val BAD_EMOJIS = listOf("👎", "💩", "🚫", "❌", "😢", "😬", "😕", "😔", "😨", "😱", "😧", "😭", "🤷", "🙅", "😞")
     }
 
     private lateinit var detectedTextView: TextView
@@ -81,6 +86,7 @@ class CameraActivity : AppCompatActivity(), GestureDetector.OnDoubleTapListener,
     }
 
     private fun solveAndUpdate() {
+        // this will not always work in time ¯\_(ツ)_/¯
         runOnUiThread {
             solutionTextView.setTextColor(resources.getColor(
                     if (ProblemSolver.allowDigitConcatenation) R.color.solutionWithConcatenation else R.color.solutionWithoutConcatenation
@@ -94,7 +100,7 @@ class CameraActivity : AppCompatActivity(), GestureDetector.OnDoubleTapListener,
         } else runOnUiThread {
             Log.d(TAG, "SOLVING $currentLicenseText...")
             stopCameraSource()
-            val solution = ProblemSolver.solveNumberString(currentLicenseText, targetNumberForSolving)
+            val solution = ProblemSolver.solveNumberString(currentLicenseText)
             randomEmojiCounter++
             if (solution != null)
                 solutionTextView.text = getString(R.string.solved_text,
